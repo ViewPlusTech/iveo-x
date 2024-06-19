@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+  <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'"> -->
+  <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">  
+
+  <title>touchscreen Test</title>
+  
+  <!-- <link rel="icon" type="image/x-icon" href="favicon.ico"> -->
+  <link rel="icon" type="image/svg+xml" href="./assets/images/favicon.svg">
+
+  <script type="module" src="./uiMain.js"></script>
+  <link rel="stylesheet" href="./style.css">
+  
+</head>
+<body>
+  <div id="edge">
+    <div class="visually-hidden">
+      <output id="announce-output" role="status" aria-live="polite"> </output>
+    </div>
+
+    <main id="canvas_container">
+      <!-- 
+      <svg id="FingerPaint" width="100%" height="100%" viewBox="0 0 800 800">
+        <defs>
+          <pattern id="grid10" x="0" y="0" width="10" height="10" patternUnits="userSpaceOnUse">
+            <rect x="0" y="0" width="10" height="10"/>
+          </pattern>
+
+          <pattern id="grid100" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
+            <rect x="0" y="0" width="100" height="100"/>
+          </pattern>
+
+          <path id="hexagon" d="M17.5,-30.3 35,0 17.5,30.3 -17.5,30.3 -35,4.3 -17.5,-30.3 17.5,-30.3" />
+          <path id="boom" d="M3.2e-15,-53 C5.1,-19.3 1.8,-6.7 20.9,-36.3 C4.9,-4.9 14.1,-14.1 45.8,-26.5 C19.3,-5.1 6.7,-1.8 42,0 C6.7,1.8 19.3,5.1 45.8,26.4 C14.1,14.1 4.9,4.9 21.0,36.3 C1.8,6.7 5.1,19.3 3.2e-15,53 C-5.1,19.3 -1.8,6.7 -20.9,36.3 C-4.9,4.9 -14.1,14.1 -45.8,26.5 C-19.3,5.1 -6.7,1.8 -42,5.1e-15 C-6.7,-1.8 -19.3,-5.1 -45.8,-26.5 C-14.1,-14.1 -4.9,-4.9 -20.9,-36.3 C-1.8,-6.7 -5.1,-19.3 -9.7e-15,-53 "/>
+        </defs>
+
+
+        <rect id="backdrop" x="0" y="0" width="100%" height="100%"/>
+      </svg>
+  
+     -->
+      <svg id="blank_canvas" viewBox="0 0 500 310">
+        <style>
+          path {
+            stroke: hsl(225, 67%,25%);
+            fill: hsl(225, 67%, 55%);
+            stroke-width: 5px;
+            stroke-linecap: round;
+          }                      
+
+          rect#canvas_bg {
+            fill: none;
+            stroke: gainsboro;
+          }
+
+          /* override styles when printing */
+          @media print {
+            rect#canvas_bg {
+              stroke: none; 
+            }
+          }
+        </style>
+        <rect id="canvas_bg" width="100%" height="100%" pointer-events="none"/>
+  
+        <g id="drawing" transform="translate(0,0)">
+          
+        </g>
+      </svg>
+
+
+    </main>
+  </div>
+
+
+  <dialog id="dialog-document-id">
+    <header> 
+      <h2>Document ID</h2>
+      <button id="dialog-document-id-close" aria-label="Close dialog">×</button>
+    </header>
+    <form>
+      <section id="dialog-document-id-container">
+        <p>
+          <label for="document_id">Type Document ID:</label>
+          <input type="text" id="document_id" name="document_id" required  minlength="4" maxlength="8" size="10">
+        </p>
+      </section>
+      <footer>
+        <button id="dialog-document-id-cancel_button" class="button" value="cancel">Cancel</button>
+        <button id="dialog-document-id-submit_button" class="button" value="default">Submit</button>     
+      </footer>
+    </form>
+
+  </dialog>
+
+  <script type="module" src="./renderer.js"></script>
+
+</body>
+</html>

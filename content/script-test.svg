@@ -1,0 +1,11 @@
+<svg id="circle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <script>
+    const circle = document.getElementById('circle-test');
+    circle.setAttribute('fill', 'red');
+  </script>
+  <circle id="circle-test" cx="30" cy="50" r="20" fill="blue" aria-label="circle" />
+  <script>
+    const circle = document.getElementById('circle-test');
+    circle.setAttribute('fill', 'pink');
+  </script>
+</svg>

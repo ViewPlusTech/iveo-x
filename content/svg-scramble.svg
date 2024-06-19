@@ -1,0 +1,83 @@
+<svg id="svg-scramble" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 310">
+  <style>
+    :root {
+      --control: hsl(193, 100%, 32%);
+      --control-border: hsl(193, 100%, 22%);
+
+      --lime_green: hsl(63, 88%, 46%);
+      --sky_blue: hsl(182, 67%, 75%);
+      --coral_pink: hsl(358, 100%, 73%);
+      --dark_coral: hsl(358, 100%, 33%);
+      --fresh_green: hsl(78, 100%, 37%);
+      --marine_turquoise: hsl(176, 82%, 38%);
+      --royal_purple: hsl(312, 100%, 31%);
+      --grass_green: hsl(145, 100%, 26%);
+
+      --chalk_white: hsl(0, 0%, 100%);
+      --ink_black: hsl(0, 0%, 0%);
+      --mist_grey: hsl(180, 3%, 88%);
+      --graphite_grey: hsl(193, 5%, 33%);
+
+      --target: hsl(80, 87%, 27%);
+      --warning: hsl(41, 87%, 47%);
+      --avoid: hsl(348, 83%, 47%);
+
+      --gold: hsl(43, 74%, 49%);
+      --dark_gold: hsl(45, 100%, 34%);
+
+    }
+
+    #circle-icon {
+      fill: var(--coral_pink);
+    }
+
+    #circle-icon-desc {
+      fill: var(--coral_pink);
+      stroke: var(--dark_coral);
+    }
+
+    #rectangle-icon {
+      fill: var(--fresh_green);
+    }
+
+    #triangle-icon {
+      fill: var(--royal_purple);
+    }
+
+    #rectangle-icon-desc {
+      fill: var(--marine_turquoise);
+      stroke: var(--grass_green);
+    }
+
+    #hexagon-icon {
+      fill: var(--gold);
+      stroke: var(--dark_gold);
+    }
+
+    #line-icon {
+      fill: none;
+      stroke: var(--grass_green);
+      stroke-width: 4px;
+      stroke-linecap: round;
+    }
+  </style>
+  <rect id="canvas_bg" width="100%" height="100%" fill="none" stroke="gainsboro" pointer-events="none"/>
+
+  <g transform="translate(0,0)">
+    <circle id="circle-icon-desc" cx="100" cy="50" r="15" aria-label="Circle" data-describe="true" />
+    <circle id="circle-icon" cx="30" cy="50" r="20" aria-label="Circle" />
+  </g>
+  <g transform="translate(150,0)">
+    <rect id="rectangle-icon" x="30" y="100" width="40" height="60" aria-label="Rectangle" />
+    <rect id="rectangle-icon-desc" x="100" y="210" width="50" height="20" aria-label="Rectangle" data-describe="true" />  
+  </g>
+  <g transform="translate(270,-150)">
+    <polygon id="triangle-icon" points="150,200 173,240 127,240" aria-label="Triangle" data-describe="true" />
+  </g>
+  <g transform="translate(80,210)">
+    <path id="hexagon-icon" d="M17.5,-30.3 35,0 17.5,30.3 -17.5,30.3 -35,0 -17.5,-30.3 17.5,-30.3 Z" aria-label="Hexagon" />
+  </g>
+  <g transform="translate(0,0)">
+    <line id="line-icon" x1="400" y1="200" x2="450" y2="250" aria-label="Diagonal line" />
+  </g>
+</svg>

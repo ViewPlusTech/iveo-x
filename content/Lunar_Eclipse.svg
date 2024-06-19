@@ -1,0 +1,185 @@
+
+<svg id="lunar_eclipse_001" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 360">
+  <title>Lunar Eclipse Diagram</title>
+
+  <style>
+    #sun {
+      fill:url(#sun_gradient);
+      stroke:#000000;
+      stroke-width:1px;
+    }
+
+    #earth {
+      fill:url(#earth_gradient);
+      stroke:#000000;
+      stroke-width:1px;
+    }
+
+    #moon {
+      fill:url(#moon_gradient);
+      stroke:#000000;
+      stroke-width:1px;
+    }
+
+    text {
+      font-family: Verdana, Geneva, Tahoma, sans-serif;
+      fill: black;
+      text-anchor: middle;
+    }
+
+    .title_label {
+      font-size: 35px;
+    }
+
+    .body_label {
+      font-size: 30px;
+      pointer-events: none;
+    }
+
+    .shadow_label {
+      font-size: 18px;
+      pointer-events: none;
+    }
+
+    .hidden_label {
+      font-size: 1px;
+      pointer-events: none;
+      display: none;
+    }
+  </style>
+
+  <rect width="100%" height="100%" stroke="red" fill="none"/>
+
+  <defs id="defs4">
+    <linearGradient id="linearGradient6276">
+      <stop style="stop-color:#000000;stop-opacity:1;" offset="0" id="stop6278" />
+      <stop style="stop-color:#cecece;stop-opacity:1;" offset="1" id="stop6280" />
+    </linearGradient>
+    <linearGradient id="linearGradient6270">
+      <stop id="stop6272" offset="0" style="stop-color:#9292ff;stop-opacity:1;" />
+      <stop id="stop6274" offset="1" style="stop-color:#0000ff;stop-opacity:1;" />
+    </linearGradient>
+    <linearGradient href="#linearGradient4177" id="linearGradient15200"
+      gradientUnits="userSpaceOnUse" x1="572.5" y1="348.59448" x2="658.5" y2="348.59448" />
+    <linearGradient id="linearGradient11911">
+      <stop style="stop-color:#ffa800;stop-opacity:1;" offset="0" id="stop11913" />
+      <stop style="stop-color:#ffff00;stop-opacity:1;" offset="1" id="stop11915" />
+    </linearGradient>
+    <linearGradient href="#linearGradient11911" id="linearGradient15108"
+      gradientUnits="userSpaceOnUse" x1="275.5" y1="358.59448" x2="433.5" y2="358.59448" />
+    <radialGradient href="#linearGradient10924" id="radialGradient15236"
+      gradientUnits="userSpaceOnUse" cx="615.5" cy="348.59448" fx="615.5" fy="348.59448" r="43" />
+    <linearGradient id="linearGradient10924">
+      <stop style="stop-color:#9292ff;stop-opacity:1;" offset="0" id="stop10926" />
+      <stop style="stop-color:#0000ff;stop-opacity:1;" offset="1" id="stop10928" />
+    </linearGradient>
+    <linearGradient href="#linearGradient10924" id="linearGradient15234"
+      gradientUnits="userSpaceOnUse" x1="572.5" y1="348.59448" x2="658.5" y2="348.59448" />
+    <marker orient="auto" refY="0" refX="0" id="Arrow1Mend" style="overflow:visible">
+      <path id="path14860" d="M 0,0 L 5,-5 L -12.5,0 L 5,5 L 0,0 z "
+        style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;marker-start:none"
+        transform="matrix(-0.4,0,0,-0.4,-4,0)" />
+    </marker>
+    <linearGradient id="moon_gradient" gradientUnits="userSpaceOnUse">
+      <stop style="stop-color:#1f0000;stop-opacity:1;" offset="0" id="stop4179" />
+      <stop style="stop-color:#ff0000;stop-opacity:0;" offset="1" id="stop4181" />
+    </linearGradient>
+    <linearGradient id="linearGradient3134">
+      <stop style="stop-color:#ffce00;stop-opacity:1;" offset="0" id="stop3136" />
+      <stop style="stop-color:#fcff00;stop-opacity:0;" offset="1" id="stop3138" />
+    </linearGradient>
+    <linearGradient href="#linearGradient11911" id="sun_gradient"
+      gradientUnits="userSpaceOnUse" x1="275.5" y1="358.59448" x2="433.5" y2="358.59448" />
+    <linearGradient href="#linearGradient10924" id="earth_gradient"
+      gradientUnits="userSpaceOnUse" x1="572.5" y1="348.59448" x2="658.5" y2="348.59448" />
+    <radialGradient href="#linearGradient10924" id="radialGradient7286"
+      gradientUnits="userSpaceOnUse" cx="615.5" cy="348.59448" fx="615.5" fy="348.59448" r="43" />
+
+  </defs>
+ 
+  <metadata id="metadata7">
+
+  </metadata>
+
+  <g id="layer1">
+    <text id="title" class="title_label" x="430" y="40" data-title_level="0">Lunar Eclipse</text>
+    <text id="description" class="hidden_label" x="430" y="40" data-desc_level="0">A diagram showing a lunar eclipse. The earth is positioned between the sun and the moon, and casts its shadow on the moon, making it appear dark.</text>
+
+
+    <g id="g7257" transform="translate(-90.263405,-163.16846)">
+      <path id="penumbra"
+        d="M 930.18596,189.84569 L 929.18013,492.34569 L 585.68888,383.92097 L 585.18596,297.28022 L 930.18596,189.84569 z "
+        style="fill:#000000;fill-opacity:0.47058824;fill-rule:evenodd;stroke:#000000;stroke-width:0;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+      <path id="sunlight"
+        d="M 189.68281,261.84253 L 188.6828,418.34885 L 585.68911,385.66082 L 586.18912,298.49274 L 189.68281,261.84253 z "
+        style="fill:#ffff00;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+
+      <g id="sun_group" data-object_level="0">  
+        <circle id="sun" cx="184" cy="340" r="79"/>
+
+        <switch>  
+          <text class="body_label" id="text7253-zh-cn" x="185" y="352" systemLanguage="zh_CN">太阳</text>
+          <text class="body_label" id="text7253-sp" x="185" y="352" systemLanguage="es">Sol</text>
+          <text id="sun_label-en" class="body_label" x="185" y="352">Sun</text>
+        </switch>
+      </g> 
+
+      <g id="earth_group" data-object_level="0">  
+        <circle id="earth" cx="587" cy="340" r="43"/>  
+
+        <switch>  
+          <text class="body_label" id="text7253-zh-cn" x="580" y="432" systemLanguage="zh_CN">地球</text>
+          <text class="body_label" id="text7253-sp" x="580" y="432" systemLanguage="es">Terra</text>
+          <text id="earth_label-en" class="body_label" x="580" y="432">Earth</text>
+        </switch>
+      </g> 
+
+      <g id="moon_group" data-object_level="0">  
+        <circle id="moon" cx="693" cy="340" r="20" />  
+
+        <switch>  
+          <text class="body_label" id="text7253-zh-cn" y="506" x="635" systemLanguage="zh_CN">月球</text>
+          <text class="body_label" id="text7253-sp" y="506" x="635" systemLanguage="sp">Lua</text>
+          <text id="moon_label-sp" class="body_label" y="506" x="635">Moon</text>
+        </switch>
+      </g> 
+
+
+
+
+      <path id="path2170" d="M 192.43526,260.38788 L 926.93666,490.59639"
+        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1.49856937;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:1.4985694, 4.49570821;stroke-dashoffset:0;stroke-opacity:1" />
+      <path id="path2172" d="M 194.45197,417.57968 L 931.41995,190.1117"
+        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1.53203416;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:1.53203416, 4.59610249;stroke-dashoffset:0;stroke-opacity:1" />
+      <path id="path2174" d="M 192.28779,419.07229 L 930.14479,355.88686"
+        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1.0823406;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:1.08234063, 3.2470219;stroke-dashoffset:0;stroke-opacity:1" />
+      <path id="path2178" d="M 191.17902,260.83875 L 928.1929,330.85263"
+        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.98612034;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:0.98612034, 2.95836103;stroke-dashoffset:0;stroke-opacity:1" />
+      <path id="umbra"
+        d="M 585.69803,385.03999 L 928.29126,356.2355 L 928.29126,330.63151 L 585.34447,298.62652 L 585.69803,385.03999 z "
+        style="fill:#000000;fill-opacity:0.4679803;fill-rule:evenodd;stroke:#000000;stroke-width:0;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+ 
+
+
+        <switch>  
+          <text class="shadow_label" id="text7253-zh-cn" x="720" y="190" systemLanguage="zh_CN">半影</text>
+          <text class="shadow_label" id="text7253-sp" x="720" y="190" systemLanguage="es">penumbra</text>
+          <text class="shadow_label" id="text7253-sp" x="720" y="190">penumbra</text>
+        </switch>
+      
+        <switch>  
+          <text class="shadow_label" id="text7253-zh-cn" x="758" y="481" systemLanguage="zh_CN">本影</text>
+          <text class="shadow_label" id="text7253-sp" x="758" y="481" systemLanguage="es">umbra</text>
+          <text class="shadow_label" id="text7253-sp" x="758" y="481">umbra</text>
+        </switch>  
+
+      <path id="path13875" d="M 717.18596,197.84569 L 822.68596,270.34569"
+        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;marker-end:url(#Arrow1Mend);stroke-opacity:1" />
+      <path id="path13877" d="M 734.83042,464.03125 L 782.83042,350.03125"
+        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;marker-start:none;marker-end:url(#Arrow1Mend);stroke-opacity:1" />
+
+      <path id="path7251" d="M 639.01984,482.03671 L 687.01984,368.03671"
+        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;marker-start:none;marker-end:url(#Arrow1Mend);stroke-opacity:1" />
+    </g>
+  </g>
+</svg>

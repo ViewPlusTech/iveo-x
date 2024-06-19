@@ -1,0 +1,18 @@
+<svg id="svg-scramble" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 310">
+
+  <rect id="canvas_bg" width="100%" height="100%" fill="none" stroke="gainsboro" pointer-events="none"/>
+
+  <g transform="translate(0,0)">
+    <circle id="circle-icon" cx="80" cy="60" r="20" aria-label="Circle" style="fill:black" />
+  </g>
+  <g transform="translate(150,0)">
+    <rect id="rectangle-icon" x="30" y="100" width="40" height="60" aria-label="Rectangle" style="fill:red" />
+  </g>
+  <g transform="translate(270,-150)">
+    <polygon id="triangle-icon" points="150,200 173,240 127,240" aria-label="Triangle" data-describe="true" style="fill:blue" />
+  </g>
+  <g transform="translate(250,210) scale(2)">
+    <path d="M32 12.408l-11.056-1.607-4.944-10.018-4.944 10.018-11.056 1.607 8 7.798-1.889 11.011 9.889-5.199 9.889 5.199-1.889-11.011 8-7.798z" id="star-1" fill="red" aria-label="Star" style="fill:green"/>
+  </g>
+
+</svg>
