@@ -16,7 +16,7 @@ window.addEventListener('load', () => {
 
 
 ipcRenderer.on('renderer-event', (event, arg) => {
-  console.log('hey! renderer-event', arg);
+  console.log('main! renderer-event', arg);
   event.sender.send('renderer-reply', `Received ${arg}`);
 
   switch ( arg ) {
@@ -38,6 +38,10 @@ ipcRenderer.on('renderer-event', (event, arg) => {
   
     case 'toggle-element-descriptions':
       ui.toggleSchemaDescription();
+      break;
+  
+    case 'toggle-strict-jim':
+      ui.toggleStrictJIMMode();
       break;
   
     case 'document-load':
@@ -160,7 +164,16 @@ export class uiMain extends EventTarget {
    */
   toggleElementDescriptions() {
     this.isElementSchema = this.isElementSchema ? false : true;
-    this._outputUtterance([`Element descriptions mode is ${this.isSpeak ? 'on' : 'off'}`]);  
+    this._outputUtterance([`Element descriptions mode is ${this.isElementSchema ? 'on' : 'off'}`]);  
+  }
+
+
+  /**
+   * Toggles strict JIM mode. Initial state is on.
+   */
+  toggleStrictJIMMode() {
+    // this.isStrictJIMMode = this.isStrictJIMMode ? false : true;
+    // this._outputUtterance([`Strict JIM mode is ${this.isStrictJIMMode ? 'on' : 'off'}`]);  
   }
 
 
@@ -239,5 +252,31 @@ export class uiMain extends EventTarget {
 
     this._outputUtterance(utteranceArray, this.contentDoc.lang);
   }
+
+
+  /**
+   * Resolves and routes output.
+   * @param {Array} utteranceArray The array of speech items.
+   * @private
+   * @memberOf module:@fizz/renderer
+   */
+  _outputUtterance(utteranceArray, lang = this.prefs.lang) {
+    if (utteranceArray.length) {
+      const utterance = utteranceArray.join('. ');
+      console.log('utterance:', utterance);
+  
+      if (this.isSpeak) {
+        // send to speech module
+        // this._invokeSpeech( utterance, lang );
+      } else {
+        // TODO: determine if we should set a lang attribute for braille region?
+
+        // write to aria-live region
+        // this.announceOutput.textContent = '';
+        // this.announceOutput.textContent = utterance;
+      }
+    }
+  }
+
 
 }

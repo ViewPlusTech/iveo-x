@@ -17,12 +17,17 @@ window.addEventListener('load', () => {
 
 ipcRenderer.on('renderer-event', (event, arg) => {
   // console.log(arg);
+  console.log('renderer! renderer-event', arg);
   event.sender.send('renderer-reply', `Received ${arg}`);
 
   switch ( arg ) {
   
     case 'toggle-dark-mode':
       canvas_container.classList.toggle('dark_mode');
+      break;
+
+    case 'toggle-strict-jim':
+      renderer.toggleStrictJIMMode();
       break;
   
     case 'save':
@@ -124,7 +129,8 @@ export class rendererClass extends EventTarget {
     this.isSonification = true;
     this.isDarkMode = false;
     this.isElementSchema = true;
-
+    
+    this.isStrictJIMMode = true;
     this._isJIMDoc = false;
 
     this._init();
@@ -437,31 +443,6 @@ export class rendererClass extends EventTarget {
     // utteranceArray.push(desc);
 
     this._outputUtterance(utteranceArray, this.contentDocument.lang);
-  }
-
-
-  /**
-   * Resolves and routes output.
-   * @param {Array} utteranceArray The array of speech items.
-   * @private
-   * @memberOf module:@fizz/renderer
-   */
-  _outputUtterance(utteranceArray, lang = this.prefs.lang) {
-    if (utteranceArray.length) {
-      const utterance = utteranceArray.join('. ');
-      // console.log('utterance:', utterance);
-  
-      if (this.isSpeak) {
-        // send to speech module
-        this._invokeSpeech( utterance, lang );
-      } else {
-        // TODO: determine if we should set a lang attribute for braille region?
-
-        // write to aria-live region
-        // this.announceOutput.textContent = '';
-        // this.announceOutput.textContent = utterance;
-      }
-    }
   }
 
 
@@ -935,6 +916,7 @@ export class rendererClass extends EventTarget {
   _getAccessibleName(target, isParent) {
     // console.log('renderer::_getAccessibleName')
     console.log('_getAccessibleName::target', target)
+    console.log('isStrictJIMMode?', this.isStrictJIMMode)
     
     let accessibleName = null;
     
@@ -945,49 +927,90 @@ export class rendererClass extends EventTarget {
           return accumulator += `. '${item}'`;
         })
       }
-    }
+    } 
     
-    // if no `JIM`, look for `aria-label` attribute
-    if (!accessibleName) {
-      accessibleName = target.getAttribute('aria-label');
-    }
+    if (!this._isJIMDoc || !this.isStrictJIMMode) {
+      console.log('No strict JIM mode, finding accessible name')
 
-    // if no `aria-label`, look for `aria-labelledby` attribute and element
-    if (!accessibleName) {
-      let labelId = target.getAttribute('aria-labelledby');
-      const labelEl = document.getElementById(labelId);
-      accessibleName = labelEl ? labelEl.textContent : null;
-    }    
 
-    // if no `aria-label`, look for `title` element
-    if (!accessibleName) {
-      const titleEl = target.querySelector('title');
-      accessibleName = titleEl ? titleEl.textContent : null;
-    }
-
-    // if no `aria-label`, look for `title` attribute
-    if (!accessibleName) {
-      accessibleName = target.getAttribute('title');
-    }
-    
-    // if no `aria-label` or `title` element, and it's text, just use text content
-    if (!accessibleName && (target.localName === 'text' || target.localName === 'tspan')) {
-      accessibleName = target.textContent;
-    }
-    
-    // if no `aria-label` or `title` element, just use element tag name
-    if (!accessibleName && !this._isJIMDoc) {
-      accessibleName = target.localName;
-    }
-
-    // if no accessible name try parent
-    if (!accessibleName && !isParent) {
-      accessibleName = this._getAccessibleName(target.parentElement, true);
+      // if no `JIM`, look for `aria-label` attribute
+      if (!accessibleName) {
+        accessibleName = target.getAttribute('aria-label');
+      }
+  
+      // if no `aria-label`, look for `aria-labelledby` attribute and element
+      if (!accessibleName) {
+        let labelId = target.getAttribute('aria-labelledby');
+        const labelEl = document.getElementById(labelId);
+        accessibleName = labelEl ? labelEl.textContent : null;
+      }    
+  
+      // if no `aria-label`, look for `title` element
+      if (!accessibleName) {
+        const titleEl = target.querySelector('title');
+        accessibleName = titleEl ? titleEl.textContent : null;
+      }
+  
+      // if no `aria-label`, look for `title` attribute
+      if (!accessibleName) {
+        accessibleName = target.getAttribute('title');
+      }
+      
+      // if no `aria-label` or `title` element, and it's text, just use text content
+      if (!accessibleName && (target.localName === 'text' || target.localName === 'tspan')) {
+        accessibleName = target.textContent;
+      }
+      
+      // if no `aria-label` or `title` element, just use element tag name
+      if (!accessibleName && !this._isJIMDoc) {
+        accessibleName = target.localName;
+      }
+  
+      // if no accessible name try parent
+      if (!accessibleName && !isParent) {
+        accessibleName = this._getAccessibleName(target.parentElement, true);
+      }
     }
 
     console.log('accessibleName:', accessibleName);
 
     return accessibleName;
   }
+
+
+
+  /**
+   * Toggles strict JIM mode. Initial state is on.
+   */
+  toggleStrictJIMMode() {
+    this.isStrictJIMMode = this.isStrictJIMMode ? false : true;
+    this._outputUtterance([`Strict JIM mode is ${this.isStrictJIMMode ? 'on' : 'off'}`]);  
+  }
+
+  /**
+   * Resolves and routes output.
+   * TODO: Move to uiMain.
+   * @param {Array} utteranceArray The array of speech items.
+   * @private
+   * @memberOf module:@fizz/renderer
+   */
+  _outputUtterance(utteranceArray, lang = this.prefs.lang) {
+    if (utteranceArray.length) {
+      const utterance = utteranceArray.join('. ');
+      // console.log('utterance:', utterance);
+  
+      if (this.isSpeak) {
+        // send to speech module
+        this._invokeSpeech( utterance, lang );
+      } else {
+        // TODO: determine if we should set a lang attribute for braille region?
+
+        // write to aria-live region
+        // this.announceOutput.textContent = '';
+        // this.announceOutput.textContent = utterance;
+      }
+    }
+  }
+
 
 }

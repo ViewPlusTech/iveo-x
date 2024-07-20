@@ -128,6 +128,14 @@ const menuTemplate = [
           window.webContents.send('renderer-event', 'toggle-element-descriptions');
         }
       },
+      {
+        label: 'Toggle Strict JSON Image Metadata (JIM)',
+        accelerator: 'CommandOrControl+J',
+        click() {
+          const window = BrowserWindow.getFocusedWindow();
+          window.webContents.send('renderer-event', 'toggle-strict-jim');
+        }
+      },
     ]
   },
   {
