@@ -157,6 +157,11 @@ const menuTemplate = [
         role: 'toggleDevTools'
       },
 
+      {
+        label: 'Full Screen',
+        role: 'togglefullscreen'
+      },
+
       { type: 'separator' },
       {
         role: 'reload',
