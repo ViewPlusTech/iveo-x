@@ -34,6 +34,10 @@ ipcRenderer.on('renderer-event', (event, arg) => {
       const svgString = renderer.saveDocument();
       event.sender.send('save', svgString);
       break;
+
+    case 'toggle-calibrate-mode':
+      renderer.startCalibration();
+      break;
   }
 });
 
@@ -133,9 +137,25 @@ export class rendererClass extends EventTarget {
     this.isStrictJIMMode = true;
     this._isJIMDoc = false;
 
+    // Initialize scaling factors (these would be set during your calibration)
+    this.scaleX = 1;
+    this.scaleY = 1;
+    this.offsetX = 0; // If your calibration includes offsets
+    this.offsetY = 0;
+
+//    this.scaleX = 0.75;
+//    this.scaleY = 1.05;
+//    this.offsetX = 0; // If your calibration includes offsets
+//    this.offsetY = 0;
+
+    // Calibration points
+    this.calibrationPoints = {
+      topLeft: { x: 0, y: 0 },
+      bottomRight: { x: 0, y: 0 }
+    };
+
     this._init();
   }
-
   
   /**
    * Initializes the module.
@@ -171,7 +191,6 @@ export class rendererClass extends EventTarget {
     this._initSpeech();  
   }
 
-
   /**
    * Initializes the loaded SVG content.
    * @param {Boolean} isOn An optional explicit value for sonification state.
@@ -190,7 +209,11 @@ export class rendererClass extends EventTarget {
       const viewbox = this.contentDoc.el.getAttribute('viewBox');
       const contentDocWidth = this.contentDoc.el.getAttribute('width');
       const contentDocHeight = this.contentDoc.el.getAttribute('height');
+      console.log('viewbox', viewbox);
+      console.log(contentDocWidth, contentDocHeight);
+
       if (viewbox) {
+        console.log('first if');
         const viewboxArray = viewbox.split(/\s+/);
         this.contentDoc.viewbox = {
           x: viewboxArray[0],
@@ -199,6 +222,7 @@ export class rendererClass extends EventTarget {
           height: viewboxArray[3],
         }
       } else if (viewbox) {
+        console.log('second if');
         this.contentDoc.viewbox = {
           x: 0,
           y: 0,
@@ -219,6 +243,83 @@ export class rendererClass extends EventTarget {
     }
   }
 
+  // Method to start the calibration process
+  startCalibration() {
+    alert('Please touch the top-left corner of the printout.');
+    this.canvasContainer.addEventListener('click', this._recordTopLeft.bind(this), { once: true });
+  }
+
+  // Method to record the top-left corner
+  _recordTopLeft(event) {
+    this.calibrationPoints.topLeft.x = event.clientX;
+    this.calibrationPoints.topLeft.y = event.clientY;
+    console.log('Top-left corner recorded:', this.calibrationPoints.topLeft);
+
+    alert('Please touch the bottom-right corner of the printout.');
+    this.canvasContainer.addEventListener('click', this._recordBottomRight.bind(this), { once: true });
+  }
+
+  // Method to record the bottom-right corner
+  _recordBottomRight(event) {
+    this.calibrationPoints.bottomRight.x = event.clientX;
+    this.calibrationPoints.bottomRight.y = event.clientY;
+    console.log('Bottom-right corner recorded:', this.calibrationPoints.bottomRight);
+
+    this._calculateScaling();
+  }
+
+  // Method to calculate scaling factors and offsets
+  _calculateScaling() {
+    const screenWidth = 1920; // Fullscreen width
+    const screenHeight = 1080; // Fullscreen height
+
+    const printoutWidth = this.calibrationPoints.bottomRight.x - this.calibrationPoints.topLeft.x;
+    const printoutHeight = this.calibrationPoints.bottomRight.y - this.calibrationPoints.topLeft.y;
+
+    // Prevent division by zero
+    if (printoutWidth === 0 || printoutHeight === 0) {
+      console.error('Calibration error: printout width or height is zero.');
+      alert('Calibration failed. Please ensure you select different points for the top-left and bottom-right corners.');
+      return;
+    }
+
+    this.scaleX = screenWidth / printoutWidth;
+    this.scaleY = screenHeight / printoutHeight;
+
+    this.offsetX = this.calibrationPoints.topLeft.x * this.scaleX;
+    this.offsetY = this.calibrationPoints.topLeft.y * this.scaleY;
+
+    console.log('Scaling factors:', { scaleX: this.scaleX, scaleY: this.scaleY });
+    console.log('Offsets:', { offsetX: this.offsetX, offsetY: this.offsetY });
+
+//    this._applyCalibration();
+  }
+
+  // Method to apply the calculated calibration
+  _applyCalibration() {
+    // Example method that could utilize the scaling
+    this.canvasContainer.addEventListener('click', this._handleTouch.bind(this));
+  }
+
+  // Method to handle touches with calibrated coordinates
+  _handleTouch(event) {
+    const calibratedCoords = this._getCalibratedCoordinates(event);
+    console.log('Calibrated Coordinates:', calibratedCoords);
+
+    // You can then use calibratedCoords for whatever your application needs
+  }
+
+  // Method to get calibrated coordinates
+  _getCalibratedCoordinates(event) {
+    const originalX = event.clientX;
+    const originalY = event.clientY;
+
+    const calibratedX = (originalX - this.offsetX) * this.scaleX;
+    const calibratedY = (originalY - this.offsetY) * this.scaleY;
+
+    return { x: calibratedX, y: calibratedY };
+  }
+
   saveDocument() {
     const serializer = new XMLSerializer();
     const svgString = serializer.serializeToString(this.canvasContainer.firstElementChild);
@@ -230,6 +331,47 @@ export class rendererClass extends EventTarget {
     if (content) {
       console.log('loadDocument', true);
       this.contentDocument = this.sanitizeContent(content);
+
+      // Set viewBox and scale to fit canvas
+      //this.contentDocument.setAttribute('viewBox', `0 0 ${this.contentDocument.getAttribute('width')} ${this.contentDocument.getAttribute('height')}`);
+      // Get original SVG dimensions
+      let originalWidth = parseFloat(this.contentDocument.getAttribute('width'));
+      let originalHeight = parseFloat(this.contentDocument.getAttribute('height'));
+
+      // If width/height are not explicitly set, fall back to viewBox
+      if (isNaN(originalWidth) || isNaN(originalHeight)) {
+        const viewBox = this.contentDocument.getAttribute('viewBox');
+        if (viewBox) {
+          const viewBoxValues = viewBox.split(' ');
+          originalWidth = parseFloat(viewBoxValues[2]);
+          originalHeight = parseFloat(viewBoxValues[3]);
+        } else {
+          console.error('SVG does not have explicit width/height or viewBox defined.');
+          return;
+        }
+      }
+
+      // Get the canvas dimensions
+      const canvasWidth = document.getElementById('canvas_container').clientWidth;
+      const canvasHeight = document.getElementById('canvas_container').clientHeight;
+
+      console.log('scale incoming SVG', originalWidth, originalHeight, canvasWidth, canvasHeight);
+
+      // Calculate aspect ratios
+      const svgAspectRatio = originalWidth / originalHeight;
+      const canvasAspectRatio = canvasWidth / canvasHeight;
+
+      // Adjust the viewBox to scale and fit the SVG within the canvas
+      if (svgAspectRatio > canvasAspectRatio) {
+        // SVG is wider than canvas, scale by width
+        this.contentDocument.setAttribute('viewBox', `0 0 ${originalWidth} ${originalWidth / canvasAspectRatio}`);
+      } else {
+        // SVG is taller than canvas, scale by height
+        this.contentDocument.setAttribute('viewBox', `0 0 ${originalHeight * canvasAspectRatio} ${originalHeight}`);
+      }      
+      // Set preserveAspectRatio to ensure upper left alignment and scaling
+      this.contentDocument.setAttribute('preserveAspectRatio', 'xMinYMin meet');
+      
       this.canvasContainer.replaceChildren(this.contentDocument);
 
       this.dataModel = new Map();
@@ -264,8 +406,6 @@ export class rendererClass extends EventTarget {
       }
     }
   }
-
-   
 
   sanitizeContent (content) {
     // NOTE: DOMParser doesn't seem to support parsing SVG with its own MIME type,
@@ -480,8 +620,10 @@ export class rendererClass extends EventTarget {
    * @memberOf module:@fizz/touchUI
    */
   _touchEdge(event) {
-    const target = event.target;
-    const relatedTarget = event.relatedTarget;
+//    const target = event.target;
+//    const relatedTarget = event.relatedTarget;
+    const target = this._getScaledTarget(event);
+    const relatedTarget = this._getScaledTarget(event);
     if (relatedTarget === this.canvasContainer) {
       // play a warning beep
       this.sonifier.startWarning();
@@ -517,6 +659,7 @@ export class rendererClass extends EventTarget {
    * @memberOf module:@fizz/renderer
    */
   _registerPointerEvent(event) {
+    console.log('_registerPointerEvent');
     return { id: event.pointerId, x: event.clientX, y: event.clientY };
   }
 
@@ -572,27 +715,27 @@ export class rendererClass extends EventTarget {
    * @memberOf module:@fizz/renderer
    */
    _handleMove(event) {
-    const target = event.target;
+    //const target = event.target;
+    const target = this._getScaledTarget(event);
     // To avoid "implicit pointer capture", where the event listener element prevents the event target 
     // from changing to a another element, even a child element, se must explicitly release the pointer
     //  after every `pointermove` event handling
     target.releasePointerCapture(event.pointerId);
-
 
     if (target === this.canvasContainer || target === this.canvasContainer.firstElementChild) {
       this.currentTarget = null;
       // handle sonification
       this.sonifier.releaseNote();
 
-      // console.log('_handleMove canvasContainer', event);
+//      console.log('_handleMove canvasContainer', event);
 
     } else if (target === this.currentTarget) {
-      // console.log('_handleMove currentTarget', event);
+//      console.log('_handleMove currentTarget', event);
 
     } else if (target !== this.currentTarget) {
       this.currentTarget = target;
 
-      // console.log('_handleMove not currentTarget', event);
+//      console.log('_handleMove not currentTarget', event);
 
       // handle sonification
       // end previous sonification
@@ -675,8 +818,8 @@ export class rendererClass extends EventTarget {
    * @memberOf module:@fizz/renderer
    */
   _describeElement(event) {
-    const target = event.target;
-    
+    const target = this._getScaledTarget(event);
+
     if (event.detail < 2) {
       // not a double click, so do normal behavior
       if (target === this.canvasContainer || target === this.canvasContainer.firstElementChild) {
@@ -686,10 +829,55 @@ export class rendererClass extends EventTarget {
   
         const desc = this._composeDescription(target);
         utteranceArray.push(desc);
-  
+
         this._outputUtterance(utteranceArray);  
       }
     }
+  }
+
+  // Helper function to scale to fit graphic with IVEO touchpad
+  _getScaledTarget(event) {
+    // Capture the original click coordinates
+    const originalX = event.clientX;
+    const originalY = event.clientY;
+
+    // Apply scaling and offsets
+    const scaledX = (originalX - this.offsetX) * this.scaleX;
+    const scaledY = (originalY - this.offsetY) * this.scaleY;
+
+    // Log the original and scaled coordinates (optional for debugging)
+    //console.log(`Original Coordinates: X=${originalX}, Y=${originalY}`);
+    //Sconsole.log(`Scaled Coordinates: X=${scaledX}, Y=${scaledY}`);
+
+    // Find the element at the scaled coordinates
+    const scaledTarget = document.elementFromPoint(scaledX, scaledY);
+
+    // Visually display the scaled coordinate point on the screen (optional for debugging)
+    this._showDebugMarker(scaledX, scaledY);
+
+    return scaledTarget;
+  }
+
+  // Helper function to show a visual marker at the given coordinates
+  _showDebugMarker(x, y) {
+    // Create a small circle element
+    const marker = document.createElement('div');
+    marker.style.position = 'absolute';
+    marker.style.width = '10px';
+    marker.style.height = '10px';
+    marker.style.backgroundColor = 'red';
+    marker.style.borderRadius = '50%';
+    marker.style.left = `${x - 5}px`;  // Offset to center the circle on the point
+    marker.style.top = `${y - 5}px`;   // Offset to center the circle on the point
+    marker.style.pointerEvents = 'none'; // Ensure it doesn't block future clicks
+
+    // Add the marker to the body
+    document.body.appendChild(marker);
+
+    // Optionally remove the marker after a short delay
+    setTimeout(() => {
+      marker.remove();
+    }, 2000);  // Adjust the delay as needed
   }
 
   /**
@@ -699,10 +887,11 @@ export class rendererClass extends EventTarget {
    * @memberOf module:@fizz/touchUI
    */
    _doubleClick(event) {
-    const target = event.target;
+//    const target = event.target;
+    const target = this._getScaledTarget(event);
     event.preventDefault();
 
-    // console.log('double click');
+    console.log('double click');
     if (target === this.canvasContainer || target === this.canvasContainer.firstElementChild) {
       this._selectElement();
       
@@ -1011,6 +1200,4 @@ export class rendererClass extends EventTarget {
       }
     }
   }
-
-
 }
