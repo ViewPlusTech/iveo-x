@@ -143,11 +143,6 @@ export class rendererClass extends EventTarget {
     this.offsetX = 0; // If your calibration includes offsets
     this.offsetY = 0;
 
-//    this.scaleX = 0.75;
-//    this.scaleY = 1.05;
-//    this.offsetX = 0; // If your calibration includes offsets
-//    this.offsetY = 0;
-
     // Calibration points
     this.calibrationPoints = {
       topLeft: { x: 0, y: 0 },
@@ -245,7 +240,7 @@ export class rendererClass extends EventTarget {
 
   // Method to start the calibration process
   startCalibration() {
-    alert('Please touch the top-left corner of the printout.');
+    alert('Please touch the top-left corner of the SVG image on the touchpad.');
     this.canvasContainer.addEventListener('click', this._recordTopLeft.bind(this), { once: true });
   }
 
@@ -255,7 +250,7 @@ export class rendererClass extends EventTarget {
     this.calibrationPoints.topLeft.y = event.clientY;
     console.log('Top-left corner recorded:', this.calibrationPoints.topLeft);
 
-    alert('Please touch the bottom-right corner of the printout.');
+    alert('Please touch the bottom-right corner of the SVG image on the touchpad.');
     this.canvasContainer.addEventListener('click', this._recordBottomRight.bind(this), { once: true });
   }
 
@@ -270,44 +265,78 @@ export class rendererClass extends EventTarget {
 
   // Method to calculate scaling factors and offsets
   _calculateScaling() {
-    const screenWidth = 1920; // Fullscreen width
-    const screenHeight = 1080; // Fullscreen height
-
-    const printoutWidth = this.calibrationPoints.bottomRight.x - this.calibrationPoints.topLeft.x;
-    const printoutHeight = this.calibrationPoints.bottomRight.y - this.calibrationPoints.topLeft.y;
-
-    // Prevent division by zero
-    if (printoutWidth === 0 || printoutHeight === 0) {
-      console.error('Calibration error: printout width or height is zero.');
-      alert('Calibration failed. Please ensure you select different points for the top-left and bottom-right corners.');
-      return;
+    // Ensure the SVG element is correctly referenced
+    if (!this.contentDoc.el) {
+        console.error('SVG element is not defined.');
+        return;
     }
 
-    this.scaleX = screenWidth / printoutWidth;
-    this.scaleY = screenHeight / printoutHeight;
+    // Get the viewBox dimensions of the SVG content
+    const svgWidth = parseFloat(this.contentDoc.viewbox.width);
+    const svgHeight = parseFloat(this.contentDoc.viewbox.height);
 
-    this.offsetX = this.calibrationPoints.topLeft.x * this.scaleX;
-    this.offsetY = this.calibrationPoints.topLeft.y * this.scaleY;
+    console.log('SVG ViewBox Width:', svgWidth, 'SVG ViewBox Height:', svgHeight);
 
-    console.log('Scaling factors:', { scaleX: this.scaleX, scaleY: this.scaleY });
-    console.log('Offsets:', { offsetX: this.offsetX, offsetY: this.offsetY });
+/*    
+    // Get the canvas dimensions
+    const canvasWidth = this.canvasContainer.clientWidth;
+    const canvasHeight = this.canvasContainer.clientHeight;
 
-//    this._applyCalibration();
-  }
+    console.log('Canvas Width:', canvasWidth, 'Canvas Height:', canvasHeight);
+*/
+    // Get the computed rem value from the root element
+    const rootElement = document.documentElement;
+    const remValue = parseFloat(getComputedStyle(rootElement).fontSize);
 
-  // Method to apply the calculated calibration
-  _applyCalibration() {
-    // Example method that could utilize the scaling
-    this.canvasContainer.addEventListener('click', this._handleTouch.bind(this));
-  }
+    console.log('Computed rem value:', remValue);
 
-  // Method to handle touches with calibrated coordinates
-  _handleTouch(event) {
-    const calibratedCoords = this._getCalibratedCoordinates(event);
-    console.log('Calibrated Coordinates:', calibratedCoords);
+    // Get the canvas dimensions and adjust for the CSS padding
+    const canvasWidth = this.canvasContainer.clientWidth - 2 * remValue;
+    const canvasHeight = this.canvasContainer.clientHeight - 2 * remValue;
 
-    // You can then use calibratedCoords for whatever your application needs
-  }
+    console.log('Adjusted Canvas Width:', canvasWidth, 'Adjusted Canvas Height:', canvasHeight);
+
+    // Calculate the scale factors based on how the SVG was scaled to fit within the canvas
+    const scaleX = canvasWidth / svgWidth;
+    const scaleY = canvasHeight / svgHeight;
+
+    // Determine which axis was constrained by the canvas and calculate the padding
+    let effectiveScale, paddingX = 0, paddingY = 0;
+
+    if (scaleX < scaleY) {
+        // Width was the constraining factor, so scaleX is the effective scale
+        effectiveScale = scaleX;
+        paddingY = (canvasHeight - (svgHeight * effectiveScale)) / 2; // Padding on top/bottom
+    } else {
+        // Height was the constraining factor, so scaleY is the effective scale
+        effectiveScale = scaleY;
+        paddingX = (canvasWidth - (svgWidth * effectiveScale)) / 2; // Padding on left/right
+    }
+
+    console.log('Effective Scale:', effectiveScale, 'PaddingX:', paddingX, 'PaddingY:', paddingY);
+
+    // Now, we can calculate the scaling factors relative to the tactile printout
+    const touchWidth = this.calibrationPoints.bottomRight.x - this.calibrationPoints.topLeft.x;
+    const touchHeight = this.calibrationPoints.bottomRight.y - this.calibrationPoints.topLeft.y;
+
+    // Prevent division by zero
+    if (touchWidth === 0 || touchHeight === 0) {
+        console.error('Calibration error: touch width or height is zero.');
+        alert('Calibration failed. Please ensure you select different points for the top-left and bottom-right corners.');
+        return;
+    }
+
+    // Calculate the final scaling factors considering the effective scale
+    this.scaleX = (svgWidth * effectiveScale) / touchWidth;
+    this.scaleY = (svgHeight * effectiveScale) / touchHeight;
+
+    // Offsets calculation - where the SVG starts relative to the canvas
+    this.offsetX = this.calibrationPoints.topLeft.x - remValue;
+    this.offsetY = this.calibrationPoints.topLeft.y - remValue;
+
+    console.log('Final Scaling factors:', { scaleX: this.scaleX, scaleY: this.scaleY });
+    console.log('Final Offsets:', { offsetX: this.offsetX, offsetY: this.offsetY });
+}
 
   // Method to get calibrated coordinates
   _getCalibratedCoordinates(event) {
@@ -356,7 +385,8 @@ export class rendererClass extends EventTarget {
       const canvasHeight = document.getElementById('canvas_container').clientHeight;
 
       console.log('scale incoming SVG', originalWidth, originalHeight, canvasWidth, canvasHeight);
-
+      this.contentDocument.setAttribute('viewBox', `0 0 ${originalWidth} ${originalHeight}`);
+/* remove adjusting viewbox
       // Calculate aspect ratios
       const svgAspectRatio = originalWidth / originalHeight;
       const canvasAspectRatio = canvasWidth / canvasHeight;
@@ -369,11 +399,24 @@ export class rendererClass extends EventTarget {
         // SVG is taller than canvas, scale by height
         this.contentDocument.setAttribute('viewBox', `0 0 ${originalHeight * canvasAspectRatio} ${originalHeight}`);
       }      
+*/
       // Set preserveAspectRatio to ensure upper left alignment and scaling
       this.contentDocument.setAttribute('preserveAspectRatio', 'xMinYMin meet');
       
       this.canvasContainer.replaceChildren(this.contentDocument);
 
+      // Update the reference to the new SVG element
+      this.contentDoc.el = this.contentDocument;
+
+      this.contentDoc.viewbox = {
+        x: 0,
+        y: 0,
+        width: parseFloat(this.contentDocument.getAttribute('viewBox').split(' ')[2]),
+        height: parseFloat(this.contentDocument.getAttribute('viewBox').split(' ')[3])
+      };
+
+      console.log('Updated SVG ViewBox:', this.contentDoc.viewbox); 
+      
       this.dataModel = new Map();
       await this._processJIM();
 
