@@ -17,3 +17,8 @@
 For braille:
 
 - text must be in text area that has focus
+
+
+For Touchpad calibration:
+- Voice instructions rather than pop up alert
+- Save settings somehow for with image?
