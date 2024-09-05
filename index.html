@@ -1,30 +1,182 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
-  <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'"> -->
-  <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">  
+    <meta charset="UTF-8">
+    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+    <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'"> -->
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
 
-  <title>touchscreen Test</title>
-  
-  <!-- <link rel="icon" type="image/x-icon" href="favicon.ico"> -->
-  <link rel="icon" type="image/svg+xml" href="./assets/images/favicon.svg">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <script type="module" src="./uiMain.js"></script>
-  <link rel="stylesheet" href="./style.css">
-  
+    <title>touchscreen Test</title>
+
+    <!-- <link rel="icon" type="image/x-icon" href="favicon.ico"> -->
+    <link rel="icon" type="image/svg+xml" href="./assets/images/favicon.svg">
+
+    <script type="module" src="./uiMain.js"></script>
+    <link rel="stylesheet" href="./style.css">
+
 </head>
-<body>
-  <div id="edge">
-    <div class="visually-hidden">
-      <output id="announce-output" role="status" aria-live="polite"> </output>
-    </div>
 
-    <main id="canvas_container">
-      <!-- 
+<body>
+    <dialog id="rect-dialog">
+        <form method="dialog">
+            <h3>Define Rectangle Properties</h3>
+
+            <label for="rect-title">Title:</label>
+            <input type="text" id="rect-title" name="title" placeholder="Enter a title"><br>
+
+            <label for="rect-desc">Description:</label>
+            <textarea id="rect-desc" name="desc" placeholder="Enter a description"></textarea><br>
+
+            <label for="rect-x">X Position:</label>
+            <input type="number" id="rect-x" name="x" value="50" required><br>
+
+            <label for="rect-y">Y Position:</label>
+            <input type="number" id="rect-y" name="y" value="50" required><br>
+
+            <label for="rect-width">Width:</label>
+            <input type="number" id="rect-width" name="width" value="100" required><br>
+
+            <label for="rect-height">Height:</label>
+            <input type="number" id="rect-height" name="height" value="100" required><br>
+
+            <label for="rect-fill">Fill Color:</label>
+            <input type="color" id="rect-fill" name="fill" value="#0000ff"><br>
+
+            <label for="rect-stroke">Stroke Color:</label>
+            <input type="color" id="rect-stroke" name="stroke" value="#000000"><br>
+
+            <label for="rect-stroke-width">Stroke Width:</label>
+            <input type="number" id="rect-stroke-width" name="stroke-width" value="2" required><br>
+
+            <menu>
+                <button id="cancel-btn">Cancel</button>
+                <button id="confirm-btn">Confirm</button>
+            </menu>
+        </form>
+    </dialog>
+    <dialog id="triangle-dialog">
+        <form method="dialog">
+            <h3>Define Triangle Properties</h3>
+
+            <label for="triangle-title">Title:</label>
+            <input type="text" id="triangle-title" name="title" placeholder="Enter a title"><br>
+
+            <label for="triangle-desc">Description:</label>
+            <textarea id="triangle-desc" name="desc" placeholder="Enter a description"></textarea><br>
+
+            <label for="triangle-x1">X1 Position:</label>
+            <input type="number" id="triangle-x1" name="x1" value="50" required><br>
+
+            <label for="triangle-y1">Y1 Position:</label>
+            <input type="number" id="triangle-y1" name="y1" value="50" required><br>
+
+            <label for="triangle-x2">X2 Position:</label>
+            <input type="number" id="triangle-x2" name="x2" value="100" required><br>
+
+            <label for="triangle-y2">Y2 Position:</label>
+            <input type="number" id="triangle-y2" name="y2" value="100" required><br>
+
+            <label for="triangle-x3">X3 Position:</label>
+            <input type="number" id="triangle-x3" name="x3" value="150" required><br>
+
+            <label for="triangle-y3">Y3 Position:</label>
+            <input type="number" id="triangle-y3" name="y3" value="50" required><br>
+
+            <label for="triangle-fill">Fill Color:</label>
+            <input type="color" id="triangle-fill" name="fill" value="#0000ff"><br>
+
+            <label for="triangle-stroke">Stroke Color:</label>
+            <input type="color" id="triangle-stroke" name="stroke" value="#000000"><br>
+
+            <label for="triangle-stroke-width">Stroke Width:</label>
+            <input type="number" id="triangle-stroke-width" name="stroke-width" value="2" required><br>
+
+            <menu>
+                <button id="triangle-cancel-btn">Cancel</button>
+                <button id="triangle-confirm-btn">Confirm</button>
+            </menu>
+        </form>
+    </dialog>
+    <dialog id="ellipse-dialog">
+        <form method="dialog">
+            <h3>Define Circle/Ellipse Properties</h3>
+
+            <label for="ellipse-title">Title:</label>
+            <input type="text" id="ellipse-title" name="title" placeholder="Enter a title"><br>
+
+            <label for="ellipse-desc">Description:</label>
+            <textarea id="ellipse-desc" name="desc" placeholder="Enter a description"></textarea><br>
+
+            <label for="ellipse-cx">Center X Position:</label>
+            <input type="number" id="ellipse-cx" name="cx" value="100" required><br>
+
+            <label for="ellipse-cy">Center Y Position:</label>
+            <input type="number" id="ellipse-cy" name="cy" value="100" required><br>
+
+            <label for="ellipse-rx">Radius X (Horizontal Radius):</label>
+            <input type="number" id="ellipse-rx" name="rx" value="50" required><br>
+
+            <label for="ellipse-ry">Radius Y (Vertical Radius):</label>
+            <input type="number" id="ellipse-ry" name="ry" value="50" required><br>
+
+            <label for="ellipse-fill">Fill Color:</label>
+            <input type="color" id="ellipse-fill" name="fill" value="#0000ff"><br>
+
+            <label for="ellipse-stroke">Stroke Color:</label>
+            <input type="color" id="ellipse-stroke" name="stroke" value="#000000"><br>
+
+            <label for="ellipse-stroke-width">Stroke Width:</label>
+            <input type="number" id="ellipse-stroke-width" name="stroke-width" value="2" required><br>
+
+            <menu>
+                <button id="ellipse-cancel-btn">Cancel</button>
+                <button id="ellipse-confirm-btn">Confirm</button>
+            </menu>
+        </form>
+    </dialog>
+    <dialog id="arrow-dialog">
+        <form method="dialog">
+            <h3>Define Arrow Properties</h3>
+            <label for="arrow-title">Title:</label>
+            <input type="text" id="arrow-title" name="title" placeholder="Enter a title"><br>
+
+            <label for="arrow-desc">Description:</label>
+            <textarea id="arrow-desc" name="desc" placeholder="Enter a description"></textarea><br>
+
+            <label for="arrow-stroke-width">Stroke Width:</label>
+            <input type="number" id="arrow-stroke-width" name="stroke-width" value="2" required><br>
+
+            <label for="arrow-x1">Start X Position:</label>
+            <input type="number" id="arrow-x1" name="x1" value="50" required><br>
+
+            <label for="arrow-y1">Start Y Position:</label>
+            <input type="number" id="arrow-y1" name="y1" value="50" required><br>
+
+            <label for="arrow-x2">End X Position:</label>
+            <input type="number" id="arrow-x2" name="x2" value="150" required><br>
+
+            <label for="arrow-y2">End Y Position:</label>
+            <input type="number" id="arrow-y2" name="y2" value="150" required><br>
+
+            <label for="arrow-stroke">Stroke Color:</label>
+            <input type="color" id="arrow-stroke" name="stroke" value="#000000"><br>
+
+            <menu>
+                <button id="arrow-cancel-btn">Cancel</button>
+                <button id="arrow-confirm-btn">Confirm</button>
+            </menu>
+        </form>
+    </dialog>
+    <div id="edge">
+        <div class="visually-hidden">
+            <output id="announce-output" role="status" aria-live="polite"> </output>
+        </div>
+
+        <main id="canvas_container">
+            <!-- 
       <svg id="FingerPaint" width="100%" height="100%" viewBox="0 0 800 800">
         <defs>
           <pattern id="grid10" x="0" y="0" width="10" height="10" patternUnits="userSpaceOnUse">
@@ -44,14 +196,14 @@
       </svg>
   
      -->
-      <svg id="blank_canvas" viewBox="0 0 500 310">
+            <svg id="blank_canvas" viewBox="0 0 500 310">
         <style>
           path {
-            stroke: hsl(225, 67%,25%);
+            stroke: hsl(225, 67%, 25%);
             fill: hsl(225, 67%, 55%);
             stroke-width: 5px;
             stroke-linecap: round;
-          }                      
+          }
 
           rect#canvas_bg {
             fill: none;
@@ -61,43 +213,47 @@
           /* override styles when printing */
           @media print {
             rect#canvas_bg {
-              stroke: none; 
+              stroke: none;
             }
           }
         </style>
-        <rect id="canvas_bg" width="100%" height="100%" pointer-events="none"/>
-  
+        <rect id="canvas_bg" width="100%" height="100%" pointer-events="none" />
+
         <g id="drawing" transform="translate(0,0)">
-          
+
         </g>
       </svg>
 
 
-    </main>
-  </div>
+        </main>
+    </div>
 
 
-  <dialog id="dialog-document-id">
-    <header> 
-      <h2>Document ID</h2>
-      <button id="dialog-document-id-close" aria-label="Close dialog">×</button>
-    </header>
-    <form>
-      <section id="dialog-document-id-container">
-        <p>
-          <label for="document_id">Type Document ID:</label>
-          <input type="text" id="document_id" name="document_id" required  minlength="4" maxlength="8" size="10">
-        </p>
-      </section>
-      <footer>
-        <button id="dialog-document-id-cancel_button" class="button" value="cancel">Cancel</button>
-        <button id="dialog-document-id-submit_button" class="button" value="default">Submit</button>     
-      </footer>
-    </form>
+    <dialog id="dialog-document-id">
+        <header>
+            <h2>Document ID</h2>
+            <button id="dialog-document-id-close" aria-label="Close dialog">×</button>
+        </header>
+        <form>
+            <section id="dialog-document-id-container">
+                <p>
+                    <label for="document_id">Type Document ID:</label>
+                    <input type="text" id="document_id" name="document_id" required minlength="4" maxlength="8" size="10">
+                </p>
+            </section>
+            <footer>
+                <button id="dialog-document-id-cancel_button" class="button" value="cancel">Cancel</button>
+                <button id="dialog-document-id-submit_button" class="button" value="default">Submit</button>
+            </footer>
+        </form>
 
-  </dialog>
+    </dialog>
+    <div id="mouse-coordinates" style="position: fixed; bottom: 10px; left: 10px; background-color: rgba(0, 0, 0, 0.5); color: white; padding: 5px; border-radius: 3px;">
+        X: 0, Y: 0
+    </div>
 
-  <script type="module" src="./renderer.js"></script>
+    <script type="module" src="./renderer.js"></script>
 
 </body>
+
 </html>

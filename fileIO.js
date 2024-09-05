@@ -67,7 +67,10 @@ function loadFile() {
       saveFilename = path.parse(file).name;
       const fileContent = fs.readFileSync(file).toString();
       // console.log(fileContent);
+      window.webContents.send('file-loaded', { fileName: saveFilename });
       window.webContents.send('load', fileContent);
+      console.log(saveFilename)
+      
     }
   }
 }
@@ -90,7 +93,7 @@ function loadFileByCode() {
     }
 
     window.webContents.send('load_id', 'huh?');
-
+    
 
     // const window = BrowserWindow.getFocusedWindow();
     // const documentIdDialog = window.webContents.getElementById('dialog-document-id');
@@ -107,12 +110,11 @@ function loadFileByCode() {
 
 
     if (filename) {
+      window.webContents.send('file-loaded', { fileName: filename });
       // const filepath = path.join(__dirname, '.', 'README.md');
       // const filePath = path.join(__dirname, '/content', filename);
       const filePath = path.join('./content', filename);
-      
       console.log('filePath', filePath);
-
       fs.readFile(filePath, 'utf-8', (err, data) => {
         if(err){
             console.log(`An error ocurred reading the file : &{err.message}`);

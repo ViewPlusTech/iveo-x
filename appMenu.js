@@ -81,6 +81,44 @@ const menuTemplate = [
     ],
   },
   {
+    label: 'Draw',
+    submenu: [
+      {
+          label: 'Circle/Ellipse',
+          accelerator: 'CommandOrControl+E',
+          click() {
+              const window = BrowserWindow.getFocusedWindow();
+              //console.log(BrowserWindow.getFocusedWindow())
+              window.webContents.send('draw-ellipse');
+          }
+      },
+      {
+          label: 'Triangle',
+          accelerator: 'CommandOrControl+T',
+          click() {
+              const window = BrowserWindow.getFocusedWindow();
+              window.webContents.send('draw-triangle');
+          }
+      },
+      {
+        label: 'Rectangle',
+        accelerator: 'CommandOrControl+R',
+        click() {
+          const window = BrowserWindow.getFocusedWindow();
+          window.webContents.send('draw-rectangle');
+        }
+      },
+      {
+          label: 'Arrow',
+          accelerator: 'CommandOrControl+A',
+          click() {
+              const window = BrowserWindow.getFocusedWindow();
+              window.webContents.send('draw-arrow');
+          }
+      },
+    ]
+  },
+  {
     label: 'Document',
     submenu: [
       {
@@ -155,6 +193,11 @@ const menuTemplate = [
       {
         label: 'Dev Tools',
         role: 'toggleDevTools'
+      },
+
+      {
+        label: 'Full Screen',
+        role: 'togglefullscreen'
       },
 
       { type: 'separator' },
