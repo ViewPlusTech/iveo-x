@@ -40,11 +40,13 @@
           "facets": {
             "x": {
               "label": "Time (Days)",
-              "variableType": "independent"
+              "variableType": "independent",
+              "labelType": "x axis"
             },
             "y": {
               "label": "Recorded Temperatures",
-              "variableType": "dependent"
+              "variableType": "dependent",
+              "labelType": "y axis"
             }
           },
           "series": [
@@ -175,8 +177,8 @@
           "$.datasets[0].series[0].records[5].*"
         ],
         "#value-Saturday_2000": [
-          "$.datasets[0].series[1].name",
-          "$.datasets[0].series[1].records[6].*"
+          "$.datasets[0].series[0].name",
+          "$.datasets[0].series[0].records[6].*"
         ],
     
         "#datapoint-Sunday_2015": [
@@ -235,6 +237,35 @@
         "#value-Saturday_2015": [
           "$.datasets[0].series[1].name",
           "$.datasets[0].series[1].records[6].*"
+        ],
+        "#Sunday": [
+          "$.datasets[0].series[0].records[0].x"
+        ],
+        "#Monday": [
+          "$.datasets[0].series[0].records[1].x"
+        ],
+        "#Tuesday": [
+          "$.datasets[0].series[0].records[2].x"
+        ],
+        "#Wednesday": [
+          "$.datasets[0].series[0].records[3].x"
+        ],
+        "#Thursday": [
+          "$.datasets[0].series[0].records[4].x"
+        ],
+        "#Friday": [
+          "$.datasets[0].series[0].records[5].x"
+        ],
+        "#Saturday": [
+          "$.datasets[0].series[0].records[6].x"
+        ],
+        "#x-axis-label": [
+          "$.datasets[0].facets.x.labelType",
+          "$.datasets[0].facets.x.label"
+        ],
+        "#y-axis-label": [
+          "$.datasets[0].facets.y.labelType",
+          "$.datasets[0].facets.y.label"
         ]
       }
     }
@@ -249,7 +280,7 @@
     <g id="y-axis">
       <!-- <path d="M206.5 1738.5 3078.5 1738.5M206.5 1514.5 3078.5 1514.5M206.5 1290.5 3078.5 1290.5M206.5 1066.5 3078.5 1066.5M206.5 842.5 3078.5 842.5M206.5 618.5 3078.5 618.5M206.5 394.5 3078.5 394.5M206.5 169.5 3078.5 169.5" stroke="#D9D9D9" stroke-width="3.4" fill="none" /> -->
       <g>
-        <text fill="#595959" font-weight="700" font-size="46" transform="matrix(6.1e-17 -1 1 6.1e-17 100.2 1295)">Recorded Temperatures</text>
+        <text id="y-axis-label" fill="#595959" font-weight="700" font-size="46" transform="matrix(6.1e-17 -1 1 6.1e-17 100.2 1295)">Recorded Temperatures</text>
       </g>
 
       <g>
@@ -291,7 +322,7 @@
     </g>
 
     <g id="x-axis">
-      <text fill="#595959" font-family="Aptos Narrow,Aptos Narrow_MSFontService,sans-serif"
+      <text id="x-axis-label" fill="#595959" font-family="Aptos Narrow,Aptos Narrow_MSFontService,sans-serif"
         font-weight="700" font-stretch="semi-condensed" font-size="46"
         transform="translate(1531.7 2096)">Time, (Days)</text>
       <g>
