@@ -685,8 +685,12 @@ export class rendererClass extends EventTarget {
         const utteranceArray = [];
   
         const desc = this._composeDescription(target);
-        utteranceArray.push(desc);
-  
+        if (desc === '') {
+          console.log('desc is empty');
+        }
+        else {
+          utteranceArray.push(desc);
+        }
         this._outputUtterance(utteranceArray);  
       }
     }
