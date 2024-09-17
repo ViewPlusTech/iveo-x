@@ -154,7 +154,7 @@ export class rendererClass extends EventTarget {
     this.canvasContainer.addEventListener('pointercancel', this._handleCancel.bind(this), false);
     this.canvasContainer.addEventListener('pointermove', this._handleMove.bind(this), false);
 
-    this.canvasContainer.addEventListener('click', this._describeElement.bind(this));
+    this.canvasContainer.addEventListener('click', this._click.bind(this));
     this.canvasContainer.addEventListener('dblclick', this._doubleClick.bind(this));
 
     document.documentElement.addEventListener('keydown', this._keyHandler.bind(this));
@@ -674,28 +674,11 @@ export class rendererClass extends EventTarget {
    * @private
    * @memberOf module:@fizz/renderer
    */
-  _describeElement(event) {
-    const target = event.target;
+  _click(event) {
     event.preventDefault();
     event.stopPropagation();
-    
-    if (event.detail < 2) {
-      // not a double click, so do normal behavior
-      if (target === this.canvasContainer || target === this.canvasContainer.firstElementChild) {
-        this.speaker.shutUp();
-      } else {
-        const utteranceArray = [];
 
-        console.log('target', target);
-
-  
-        const desc = this._composeDescription(target);
-        if (desc ) {
-          utteranceArray.push(desc);
-        }
-        this._outputUtterance(utteranceArray);  
-      }
-    }
+    this._describeElement(event);
   }
 
   /**
@@ -711,6 +694,7 @@ export class rendererClass extends EventTarget {
 
     // console.log('double click');
     if (target === this.canvasContainer || target === this.canvasContainer.firstElementChild) {
+      // if doubleclick on background, deselect all elements
       this._selectElement();
       
       return;
@@ -745,6 +729,34 @@ export class rendererClass extends EventTarget {
   }
 
   /**
+   * Reads element labels and default settings, and triggers speech.
+   * @param {Event} event The event on the element.
+   * @private
+   * @memberOf module:@fizz/renderer
+   */
+  _describeElement(event) {
+    const target = event.target;
+
+    if (event.detail < 2) {
+      // not a double click, so do normal behavior
+      if (target === this.canvasContainer || target === this.canvasContainer.firstElementChild) {
+        this.speaker.shutUp();
+      } else {
+        const utteranceArray = [];
+
+        console.log('target', target);
+
+  
+        const desc = this._composeDescription(target);
+        if (desc ) {
+          utteranceArray.push(desc);
+        }
+        this._outputUtterance(utteranceArray);  
+      }
+    }
+  }
+
+  /**
    * Set selected element and add a highlight box.
    * @param {Element} target The element to be selected; deselects if absent or `null`.
    * @private
@@ -762,37 +774,41 @@ export class rendererClass extends EventTarget {
       this.selectedElement = target;
       this.selectedElements.push(target);
 
-      // highlight box
-      const bbox = target.getBBox();
+      this.selectedElement.setAttribute('tabindex', '-1');
+      this.selectedElement.focus();
+      this.selectedElement.classList.add('selected');
 
-      let x = bbox.x;
-      let y = bbox.y;
+      // // highlight box
+      // const bbox = target.getBBox();
 
-      // find any transforms on the element 
-      // TODO: fix this hack
-      const transforms = target.parentNode.getAttribute('transform');
-      if (transforms) {
-        // highlightBox.setAttribute('transform', transforms );
-        // x += transforms.e;
-        // y += transforms.f;
-        let translate = transforms.split('translate(')[1].split(')')[0].split(',');
-        x += parseFloat(translate[0]);
-        y += parseFloat(translate[1]);
-        // const transformMatrix = target.transform.baseVal.consolidate().matrix;
+      // let x = bbox.x;
+      // let y = bbox.y;
 
-        // console.log('target.transform.baseVal.consolidate()', target.transform.baseVal.consolidate());
-      }
+      // // find any transforms on the element 
+      // // TODO: fix this hack
+      // const transforms = target.parentNode.getAttribute('transform');
+      // if (transforms) {
+      //   // highlightBox.setAttribute('transform', transforms );
+      //   // x += transforms.e;
+      //   // y += transforms.f;
+      //   let translate = transforms.split('translate(')[1].split(')')[0].split(',');
+      //   x += parseFloat(translate[0]);
+      //   y += parseFloat(translate[1]);
+      //   // const transformMatrix = target.transform.baseVal.consolidate().matrix;
 
-      const highlightBox = document.createElementNS(this.svgns, 'rect');
-      highlightBox.classList.add('_highlight_box');
-      highlightBox.setAttribute('x', x - 2.5 );
-      highlightBox.setAttribute('y', y - 2.5 );
-      highlightBox.setAttribute('width', bbox.width + 5 );
-      highlightBox.setAttribute('height', bbox.height + 5 );
+      //   // console.log('target.transform.baseVal.consolidate()', target.transform.baseVal.consolidate());
+      // }
 
-      this.canvasContainer.firstElementChild.append(highlightBox);
+      // const highlightBox = document.createElementNS(this.svgns, 'rect');
+      // highlightBox.classList.add('_highlight_box');
+      // highlightBox.setAttribute('x', x - 2.5 );
+      // highlightBox.setAttribute('y', y - 2.5 );
+      // highlightBox.setAttribute('width', bbox.width + 5 );
+      // highlightBox.setAttribute('height', bbox.height + 5 );
+
+      // this.canvasContainer.firstElementChild.append(highlightBox);
   
-      this.highlightBoxes.set(target, highlightBox);
+      // this.highlightBoxes.set(target, highlightBox);
 
 
 
@@ -808,14 +824,15 @@ export class rendererClass extends EventTarget {
   _deselectElement(target) {
     if (target) {
       if (target === this.selectedElement) {
+        this.selectedElement.classList.remove('selected');
         this.selectedElement = null;
       }
       const index = this.selectedElements.indexOf(target);
       this.selectedElements.splice(index, 1);
 
-      const highlightBox = this.highlightBoxes.get(target);
-      highlightBox.remove();
-      this.highlightBoxes.delete(target);
+      // const highlightBox = this.highlightBoxes.get(target);
+      // highlightBox.remove();
+      // this.highlightBoxes.delete(target);
     }
   }
 
@@ -827,8 +844,10 @@ export class rendererClass extends EventTarget {
   _clearSelectedElements() {
     this.selectedElement = null;
     for (const target of this.selectedElements) {
-      const highlightBox = this.highlightBoxes.get(target);
-      highlightBox.remove();
+      // const highlightBox = this.highlightBoxes.get(target);
+      // highlightBox.remove();
+      target.classList.remove('selected');
+
     }
     this.selectedElements = [];
     this.highlightBoxes = new WeakMap();

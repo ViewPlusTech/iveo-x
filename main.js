@@ -37,6 +37,12 @@ const createWindow = () => {
     // console.log(contextMenu, contextMenu.getItemCount);
     // contextMenu.popup(mainWindow.webContents);
   });
+
+  mainWindow.webContents.on('did-finish-load', () => {
+    mainWindow.webContents.insertCSS('text { user-select: none; cursor: default; } text::selection { background: none; }*.selected { outline: black 10px solid; }')
+  })
+
+  //  ' *:focus { outline: black 10px solid; } '
   
 
   // mainWindow.maximize(); // maximize window, don't need if fullscreen
