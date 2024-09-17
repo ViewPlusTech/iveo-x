@@ -177,15 +177,15 @@ export class rendererClass extends EventTarget {
    * @param {Boolean} isOn An optional explicit value for sonification state.
    */
   async initializeContentDocument() {
-    console.log('initializeContentDocument ok?')
+    // console.log('initializeContentDocument ok?')
     // the loaded SVG content
     this.contentDoc.el = this.canvasContainer.firstElementChild;
 
-    console.log('this.contentDoc.el', this.contentDoc.el);
+    // console.log('this.contentDoc.el', this.contentDoc.el);
 
     // if (this.contentDoc.el && this.contentDoc.el.id !== 'blank_canvas') {
     if (this.contentDoc.el) {
-      console.log('this.contentDoc.el loaded', this.contentDoc.el);
+      // console.log('this.contentDoc.el loaded', this.contentDoc.el);
 
       const viewbox = this.contentDoc.el.getAttribute('viewBox');
       const contentDocWidth = this.contentDoc.el.getAttribute('width');
@@ -676,6 +676,8 @@ export class rendererClass extends EventTarget {
    */
   _describeElement(event) {
     const target = event.target;
+    event.preventDefault();
+    event.stopPropagation();
     
     if (event.detail < 2) {
       // not a double click, so do normal behavior
@@ -683,12 +685,12 @@ export class rendererClass extends EventTarget {
         this.speaker.shutUp();
       } else {
         const utteranceArray = [];
+
+        console.log('target', target);
+
   
         const desc = this._composeDescription(target);
-        if (desc === '') {
-          console.log('desc is empty');
-        }
-        else {
+        if (desc ) {
           utteranceArray.push(desc);
         }
         this._outputUtterance(utteranceArray);  
@@ -705,6 +707,7 @@ export class rendererClass extends EventTarget {
    _doubleClick(event) {
     const target = event.target;
     event.preventDefault();
+    event.stopPropagation();
 
     // console.log('double click');
     if (target === this.canvasContainer || target === this.canvasContainer.firstElementChild) {
@@ -891,6 +894,7 @@ export class rendererClass extends EventTarget {
         this._invokeSpeech( utterance, lang );
       } else {
         // TODO: determine if we should set a lang attribute for braille region?
+        console.log('utterance', utterance);
 
         // write to aria-live region
         this.announceOutput.textContent = '';
@@ -919,8 +923,8 @@ export class rendererClass extends EventTarget {
    */
   _getAccessibleName(target, isParent) {
     // console.log('renderer::_getAccessibleName')
-    console.log('_getAccessibleName::target', target)
-    console.log('isStrictJIMMode?', this.isStrictJIMMode)
+    // console.log('_getAccessibleName::target', target)
+    // console.log('isStrictJIMMode?', this.isStrictJIMMode)
     
     let accessibleName = null;
     
@@ -976,7 +980,9 @@ export class rendererClass extends EventTarget {
       }
     }
 
-    console.log('accessibleName:', accessibleName);
+    if (accessibleName) {
+      console.log('accessibleName:', accessibleName);
+    }
 
     return accessibleName;
   }
