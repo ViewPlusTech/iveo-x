@@ -43,7 +43,14 @@ const menuTemplate = [
   {
     label: 'IVEO-X',
     submenu: [
-      { role: 'quit' },
+      {
+        label: 'Exit',
+        accelerator: 'ALT+X',
+        click() {
+          app.quit();
+
+        }
+      }
     ],
   },
   {
@@ -85,7 +92,7 @@ const menuTemplate = [
     submenu: [
       {
         label: 'Calibrate Document…',
-        accelerator: 'CommandOrControl+C',
+        accelerator: 'CommandOrControl+K',
         click() {
           const window = BrowserWindow.getFocusedWindow();
           window.webContents.send('renderer-event', 'toggle-calibrate-mode');
@@ -155,6 +162,11 @@ const menuTemplate = [
       {
         label: 'Dev Tools',
         role: 'toggleDevTools'
+      },
+
+      {
+        label: 'Full Screen',
+        role: 'togglefullscreen'
       },
 
       { type: 'separator' },

@@ -34,6 +34,10 @@ ipcRenderer.on('renderer-event', (event, arg) => {
       const svgString = renderer.saveDocument();
       event.sender.send('save', svgString);
       break;
+
+    case 'toggle-calibrate-mode':
+      renderer.startCalibration();
+      break;
   }
 });
 
@@ -132,6 +136,18 @@ export class rendererClass extends EventTarget {
     
     this.isStrictJIMMode = true;
     this._isJIMDoc = false;
+    
+    // Initialize scaling factors (these would be set during your calibration)
+    this.scaleX = 1;
+    this.scaleY = 1;
+    this.offsetX = 0; // If your calibration includes offsets
+    this.offsetY = 0;
+
+    // Calibration points
+    this.calibrationPoints = {
+      topLeft: { x: 0, y: 0 },
+      bottomRight: { x: 0, y: 0 }
+    };
 
     this._init();
   }
@@ -219,6 +235,117 @@ export class rendererClass extends EventTarget {
     }
   }
 
+  // Method to start the calibration process
+  startCalibration() {
+    alert('Please touch the top-left corner of the SVG image on the touchpad.');
+    this.canvasContainer.addEventListener('click', this._recordTopLeft.bind(this), { once: true });
+  }
+
+  // Method to record the top-left corner
+  _recordTopLeft(event) {
+    this.calibrationPoints.topLeft.x = event.clientX;
+    this.calibrationPoints.topLeft.y = event.clientY;
+    console.log('Top-left corner recorded:', this.calibrationPoints.topLeft);
+
+    alert('Please touch the bottom-right corner of the SVG image on the touchpad.');
+    this.canvasContainer.addEventListener('click', this._recordBottomRight.bind(this), { once: true });
+  }
+
+  // Method to record the bottom-right corner
+  _recordBottomRight(event) {
+    this.calibrationPoints.bottomRight.x = event.clientX;
+    this.calibrationPoints.bottomRight.y = event.clientY;
+    console.log('Bottom-right corner recorded:', this.calibrationPoints.bottomRight);
+
+    this._calculateScaling();
+  }
+
+  // Method to calculate scaling factors and offsets
+  _calculateScaling() {
+    // Ensure the SVG element is correctly referenced
+    if (!this.contentDoc.el) {
+        console.error('SVG element is not defined.');
+        return;
+    }
+
+    // Get the viewBox dimensions of the SVG content
+    const svgWidth = parseFloat(this.contentDoc.viewbox.width);
+    const svgHeight = parseFloat(this.contentDoc.viewbox.height);
+
+    console.log('SVG ViewBox Width:', svgWidth, 'SVG ViewBox Height:', svgHeight);
+
+/*    
+    // Get the canvas dimensions
+    const canvasWidth = this.canvasContainer.clientWidth;
+    const canvasHeight = this.canvasContainer.clientHeight;
+
+    console.log('Canvas Width:', canvasWidth, 'Canvas Height:', canvasHeight);
+*/
+    // Get the computed rem value from the root element
+    const rootElement = document.documentElement;
+    const remValue = parseFloat(getComputedStyle(rootElement).fontSize);
+
+    console.log('Computed rem value:', remValue);
+
+    // Get the canvas dimensions and adjust for the CSS padding
+    const canvasWidth = this.canvasContainer.clientWidth - 2 * remValue;
+    const canvasHeight = this.canvasContainer.clientHeight - 2 * remValue;
+
+    console.log('Adjusted Canvas Width:', canvasWidth, 'Adjusted Canvas Height:', canvasHeight);
+
+    // Calculate the scale factors based on how the SVG was scaled to fit within the canvas
+    const scaleX = canvasWidth / svgWidth;
+    const scaleY = canvasHeight / svgHeight;
+
+    // Determine which axis was constrained by the canvas and calculate the padding
+    let effectiveScale, paddingX = 0, paddingY = 0;
+
+    if (scaleX < scaleY) {
+        // Width was the constraining factor, so scaleX is the effective scale
+        effectiveScale = scaleX;
+        paddingY = (canvasHeight - (svgHeight * effectiveScale)) / 2; // Padding on top/bottom
+    } else {
+        // Height was the constraining factor, so scaleY is the effective scale
+        effectiveScale = scaleY;
+        paddingX = (canvasWidth - (svgWidth * effectiveScale)) / 2; // Padding on left/right
+    }
+
+    console.log('Effective Scale:', effectiveScale, 'PaddingX:', paddingX, 'PaddingY:', paddingY);
+
+    // Now, we can calculate the scaling factors relative to the tactile printout
+    const touchWidth = this.calibrationPoints.bottomRight.x - this.calibrationPoints.topLeft.x;
+    const touchHeight = this.calibrationPoints.bottomRight.y - this.calibrationPoints.topLeft.y;
+
+    // Prevent division by zero
+    if (touchWidth === 0 || touchHeight === 0) {
+        console.error('Calibration error: touch width or height is zero.');
+        alert('Calibration failed. Please ensure you select different points for the top-left and bottom-right corners.');
+        return;
+    }
+
+    // Calculate the final scaling factors considering the effective scale
+    this.scaleX = (svgWidth * effectiveScale) / touchWidth;
+    this.scaleY = (svgHeight * effectiveScale) / touchHeight;
+
+    // Offsets calculation - where the SVG starts relative to the canvas
+    this.offsetX = this.calibrationPoints.topLeft.x - remValue;
+    this.offsetY = this.calibrationPoints.topLeft.y - remValue;
+
+    console.log('Final Scaling factors:', { scaleX: this.scaleX, scaleY: this.scaleY });
+    console.log('Final Offsets:', { offsetX: this.offsetX, offsetY: this.offsetY });
+}
+
+  // Method to get calibrated coordinates
+  _getCalibratedCoordinates(event) {
+    const originalX = event.clientX;
+    const originalY = event.clientY;
+
+    const calibratedX = (originalX - this.offsetX) * this.scaleX;
+    const calibratedY = (originalY - this.offsetY) * this.scaleY;
+
+    return { x: calibratedX, y: calibratedY };
+  }
+
   saveDocument() {
     const serializer = new XMLSerializer();
     const svgString = serializer.serializeToString(this.canvasContainer.firstElementChild);
@@ -230,8 +357,61 @@ export class rendererClass extends EventTarget {
     if (content) {
       console.log('loadDocument', true);
       this.contentDocument = this.sanitizeContent(content);
+
+      // Get original SVG dimensions
+      let originalWidth = parseFloat(this.contentDocument.getAttribute('width'));
+      let originalHeight = parseFloat(this.contentDocument.getAttribute('height'));
+
+      // If width/height are not explicitly set, fall back to viewBox
+      if (isNaN(originalWidth) || isNaN(originalHeight)) {
+        const viewBox = this.contentDocument.getAttribute('viewBox');
+        if (viewBox) {
+          const viewBoxValues = viewBox.split(' ');
+          originalWidth = parseFloat(viewBoxValues[2]);
+          originalHeight = parseFloat(viewBoxValues[3]);
+        } else {
+          console.error('SVG does not have explicit width/height or viewBox defined.');
+          return;
+        }
+      }
+
+      // Get the canvas dimensions
+      const canvasWidth = document.getElementById('canvas_container').clientWidth;
+      const canvasHeight = document.getElementById('canvas_container').clientHeight;
+
+      console.log('scale incoming SVG', originalWidth, originalHeight, canvasWidth, canvasHeight);
+      this.contentDocument.setAttribute('viewBox', `0 0 ${originalWidth} ${originalHeight}`);
+/* remove adjusting viewbox
+      // Calculate aspect ratios
+      const svgAspectRatio = originalWidth / originalHeight;
+      const canvasAspectRatio = canvasWidth / canvasHeight;
+
+      // Adjust the viewBox to scale and fit the SVG within the canvas
+      if (svgAspectRatio > canvasAspectRatio) {
+        // SVG is wider than canvas, scale by width
+        this.contentDocument.setAttribute('viewBox', `0 0 ${originalWidth} ${originalWidth / canvasAspectRatio}`);
+      } else {
+        // SVG is taller than canvas, scale by height
+        this.contentDocument.setAttribute('viewBox', `0 0 ${originalHeight * canvasAspectRatio} ${originalHeight}`);
+      }      
+*/
+      // Set preserveAspectRatio to ensure upper left alignment and scaling
+      this.contentDocument.setAttribute('preserveAspectRatio', 'xMinYMin meet');
+
       this.canvasContainer.replaceChildren(this.contentDocument);
 
+      // Update the reference to the new SVG element
+      this.contentDoc.el = this.contentDocument;
+
+      this.contentDoc.viewbox = {
+        x: 0,
+        y: 0,
+        width: parseFloat(this.contentDocument.getAttribute('viewBox').split(' ')[2]),
+        height: parseFloat(this.contentDocument.getAttribute('viewBox').split(' ')[3])
+      };
+
+      console.log('Updated SVG ViewBox:', this.contentDoc.viewbox); 
+      
       this.dataModel = new Map();
       await this._processJIM();
 
@@ -480,7 +660,8 @@ export class rendererClass extends EventTarget {
    * @memberOf module:@fizz/touchUI
    */
   _touchEdge(event) {
-    const target = event.target;
+    // const target = event.target;
+    const target = this._getScaledTarget(event);
     const relatedTarget = event.relatedTarget;
     if (relatedTarget === this.canvasContainer) {
       // play a warning beep
@@ -572,7 +753,8 @@ export class rendererClass extends EventTarget {
    * @memberOf module:@fizz/renderer
    */
    _handleMove(event) {
-    const target = event.target;
+    // const target = event.target;
+    const target = this._getScaledTarget(event);
     // To avoid "implicit pointer capture", where the event listener element prevents the event target 
     // from changing to a another element, even a child element, se must explicitly release the pointer
     //  after every `pointermove` event handling
@@ -688,7 +870,8 @@ export class rendererClass extends EventTarget {
    * @memberOf module:@fizz/touchUI
    */
    _doubleClick(event) {
-    const target = event.target;
+    // const target = event.target;
+    const target = this._getScaledTarget(event);
     event.preventDefault();
     event.stopPropagation();
 
@@ -735,7 +918,8 @@ export class rendererClass extends EventTarget {
    * @memberOf module:@fizz/renderer
    */
   _describeElement(event) {
-    const target = event.target;
+    // const target = event.target;
+    const target = this._getScaledTarget(event);
 
     if (event.detail < 2) {
       // not a double click, so do normal behavior
@@ -754,6 +938,51 @@ export class rendererClass extends EventTarget {
         this._outputUtterance(utteranceArray);  
       }
     }
+  }
+
+  // Helper function to scale to fit graphic with IVEO touchpad
+  _getScaledTarget(event) {
+    // Capture the original click coordinates
+    const originalX = event.clientX;
+    const originalY = event.clientY;
+
+    // Apply scaling and offsets
+    const scaledX = (originalX - this.offsetX) * this.scaleX;
+    const scaledY = (originalY - this.offsetY) * this.scaleY;
+
+    // Log the original and scaled coordinates (optional for debugging)
+    //console.log(`Original Coordinates: X=${originalX}, Y=${originalY}`);
+    //Sconsole.log(`Scaled Coordinates: X=${scaledX}, Y=${scaledY}`);
+
+    // Find the element at the scaled coordinates
+    const scaledTarget = document.elementFromPoint(scaledX, scaledY);
+
+    // Visually display the scaled coordinate point on the screen (optional for debugging)
+    this._showDebugMarker(scaledX, scaledY);
+
+    return scaledTarget;
+  }
+
+  // Helper function to show a visual marker at the given coordinates
+  _showDebugMarker(x, y) {
+    // Create a small circle element
+    const marker = document.createElement('div');
+    marker.style.position = 'absolute';
+    marker.style.width = '10px';
+    marker.style.height = '10px';
+    marker.style.backgroundColor = 'red';
+    marker.style.borderRadius = '50%';
+    marker.style.left = `${x - 5}px`;  // Offset to center the circle on the point
+    marker.style.top = `${y - 5}px`;   // Offset to center the circle on the point
+    marker.style.pointerEvents = 'none'; // Ensure it doesn't block future clicks
+
+    // Add the marker to the body
+    document.body.appendChild(marker);
+
+    // Optionally remove the marker after a short delay
+    setTimeout(() => {
+      marker.remove();
+    }, 2000);  // Adjust the delay as needed
   }
 
   /**
